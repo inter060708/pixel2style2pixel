@@ -9,6 +9,7 @@ import numpy as np
 from mmcv.cnn import constant_init, kaiming_init
 from mmcv.utils.parrots_wrapper import _BatchNorm
 
+
 class PixelNorm(nn.Module):
     def __init__(self):
         super().__init__()
@@ -542,9 +543,14 @@ class Generator(nn.Module):
         image = skip
 
         # return image, fea_outs#, img_skips
-        return fea_outs#, img_skips
+        # return fea_outs#, img_skips
 
-
+        if return_latents:
+            return image, latent
+        elif return_features:
+            return image, fea_outs
+        else:
+            return image, None
 
 
 
@@ -677,7 +683,6 @@ class Decoder(nn.Module):
         self.decoder = nn.ModuleList()
 
         for res in self.decoder_res:
-
             if res == in_size:
                 in_channels = channels[res]
             else:
@@ -687,9 +692,7 @@ class Decoder(nn.Module):
                 out_channels = channels[res * 2]
                 self.decoder.append(TransposeBlur(in_channels, out_channels))
 
-
             else:
-                
                 self.decoder.append(
                     nn.Sequential(
                         nn.Conv2d(in_channels, 16, 3, 1, 1),
